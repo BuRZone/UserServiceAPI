@@ -7,11 +7,12 @@ namespace UserServiceAPI.DAL.Entity
 {
     public class User
     {
-        [Key]
         public int Id { get; set; }
+
         public string Email { get; set; }
         public string NickName { get; set; }
         public string Comments { get; set; }
+        [DataType(DataType.Date)]
         public DateTime CreateDate { get; set; }
     }
 }

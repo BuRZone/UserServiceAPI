@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using UserServiceAPI.DAL.Entity;
 using UserServiceAPI.DAL.Interfaces;
 
 namespace UserServiceAPI.DAL.Repositories
-{   
+{
     public class UserRepository : IBaseRepository<User>
     {
         private readonly ApplicationDbContext _context;

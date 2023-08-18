@@ -48,11 +48,11 @@ namespace UserServiceAPI.BLL.Services.Implementations
                 _logger.LogError(ex, $"[UserService.Create] error: {ex.Message}");
             }
         }
-        public async Task Delete(string email)
+        public async Task Delete(UserDTO userDTO)
         {
             try
             {
-                var userQ = await _repository.Get().FirstOrDefaultAsync(x => x.Email == email);
+                var userQ = await _repository.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
 
                 if (userQ != null)
                 {
@@ -71,11 +71,11 @@ namespace UserServiceAPI.BLL.Services.Implementations
             return _repository.Get();
         }
 
-        public async Task Update(string email, UserDTO userDTO)
+        public async Task Update(UserDTO userDTO)
         {
             try
             {
-                var userQ = await _repository.Get().FirstOrDefaultAsync(x => x.Email == email);
+                var userQ = await _repository.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
 
                 if (userQ != null)
                 {
@@ -84,7 +84,7 @@ namespace UserServiceAPI.BLL.Services.Implementations
 
 
                     await _repository.Update(userQ);
-                    _logger.LogInformation($"[UserService.Update] пользователь обновлен {userQ.Email}");
+                    _logger.LogInformation($"[UserService.Update] данные пользователя обновлены {userQ.Email}");
                 }
             }
             catch (Exception ex)
