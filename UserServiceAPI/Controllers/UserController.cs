@@ -7,6 +7,7 @@ using UserServiceAPI.BLL.DTO;
 using UserServiceAPI.BLL.Services.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace UserServiceAPI.Controllers
 {
@@ -19,11 +20,44 @@ namespace UserServiceAPI.Controllers
             _userService = userService;
             _logger = logger;
         }
+
+
+        [Route("api/List")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            List<UserDTO> userDTOList = new List<UserDTO>();
+            var userQ = await _userService.Get().ToListAsync();
+            if (userQ.Count != 0)
+            {
+                foreach (var user in userQ)
+                {
+                    UserDTO userDTO = new UserDTO()
+                    {
+                        Id = user.Id,
+                        Email = user.Email,
+                        NickName = user.NickName,
+                        Comments = user.Comments,
+                        CreateDate = user.CreateDate
+                    };
+                    userDTOList.Add(userDTO);
+                }
+                return Ok(userDTOList);
+            }
+            return BadRequest("no User found");
+        }
+
         [Route("api/Get")]
         [HttpGet]
-        public async Task<IActionResult> Get(string email)
+        public async Task<IActionResult> Get(string jsonString)
         {
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == email);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
+            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
             if (userQ != null)
             {
                 var UserDTO = new UserDTO()
@@ -36,18 +70,25 @@ namespace UserServiceAPI.Controllers
                 };
                 return Ok(UserDTO);
             }
-            return Ok("User not found");
+            return BadRequest("User not found");
 
         }
         [Route("api/Create")]
         [HttpPost]
-        public async Task<IActionResult> Create(UserDTO userDTO)
+        public async Task<IActionResult> Create(string jsonString)
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
             var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
             if (userQ != null)
             {
-                return Ok("User allready exist");
+                return BadRequest("User allready exist");
             }
+
             await _userService.Create(userDTO);
 
             var userQuery  = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
@@ -55,8 +96,48 @@ namespace UserServiceAPI.Controllers
             {
                 return Ok("User seccesfully created");
             }
-            return Ok("что то пошло не так");
+            return BadRequest("что то пошло не так");
             
+        }
+
+        [Route("api/Update")]
+        [HttpPut]
+        public async Task<IActionResult> Update(string jsonString)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
+            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
+            if (userQ != null) 
+            {
+                await _userService.Update(userDTO);
+                return Ok("User updated seccesfully");
+            }
+            return BadRequest();
+
+        }
+
+        [Route("api/Delete")]
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string jsonString)
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
+            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
+            if (userQ != null)
+            {
+                await _userService.Delete(userDTO);
+                return Ok("User deleted seccesfully");
+            }
+            return BadRequest();
+
         }
     }
 }

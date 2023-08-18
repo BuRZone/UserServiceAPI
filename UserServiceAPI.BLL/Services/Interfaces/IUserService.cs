@@ -12,7 +12,7 @@ namespace UserServiceAPI.BLL.Services.Interfaces
     {
         IQueryable<User> Get();
         Task Create(UserDTO userDTO);
-        Task Update(string email, UserDTO userDTO);
-        Task Delete(string email);
+        Task Update(UserDTO userDTO);
+        Task Delete(UserDTO userDTO);
     }
 }
