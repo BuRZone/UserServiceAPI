@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
+using System;
 using UserServiceAPI.BLL.DTO;
 using UserServiceAPI.BLL.Services.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace UserServiceAPI.Controllers
 {
@@ -18,40 +19,11 @@ namespace UserServiceAPI.Controllers
             _userService = userService;
             _logger = logger;
         }
-
-        [Route("/api/List")]
+        [Route("api/Get")]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> Get(string email)
         {
-            List<UserDTO> userDTOs = new List<UserDTO>(); 
-            var usersQ = await _userService.Get().ToListAsync();
-            foreach (var user in usersQ)
-            {
-                UserDTO userDTO = new UserDTO()
-                {
-                    Id = user.Id,
-                    Email = user.Email,
-                    NickName = user.NickName,
-                    Comments = user.Comments,
-                    CreateDate = user.CreateDate,
-                };
-                userDTOs.Add(userDTO);
-            }
-            return Ok(userDTOs);
-        }
-
-            [Route("api/Get")]
-        [HttpGet]
-        public async Task<IActionResult> Get(string jsonString)
-        {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            UserDTO userDTOQ = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-            
-
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTOQ.Email);
+            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == email);
             if (userQ != null)
             {
                 var UserDTO = new UserDTO()
@@ -64,102 +36,27 @@ namespace UserServiceAPI.Controllers
                 };
                 return Ok(UserDTO);
             }
-            return NotFound("User not found");
+            return Ok("User not found");
 
         }
         [Route("api/Create")]
         [HttpPost]
-        public async Task<IActionResult> Create(string jsonString)
+        public async Task<IActionResult> Create(UserDTO userDTO)
         {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            UserDTO userDTOQ = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTOQ.Email);
+            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
             if (userQ != null)
             {
                 return Ok("User allready exist");
             }
-            var userDTO = new UserDTO()
-            {
-                Id = default,
-                Email = userDTOQ.Email,
-                NickName = userDTOQ.NickName,
-                Comments = userDTOQ.Comments,
-                CreateDate = default
-            };
-
             await _userService.Create(userDTO);
-            var newUser = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTOQ.Email);
-            if (newUser != null) 
+
+            var userQuery  = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
+            if (userQuery != null)
             {
-                UserDTO user = new UserDTO()
-                {
-                    Id = newUser.Id,
-                    Email = newUser.Email,
-                    NickName = newUser.NickName,
-                    Comments = newUser.Comments,
-                    CreateDate = newUser.CreateDate
-                };
-                string json = JsonSerializer.Serialize(user);
-                return Ok("User seccesfully created\n" + json);
+                return Ok("User seccesfully created");
             }
-            return BadRequest();  
-        }
-
-        [Route("api/Update")]
-        [HttpPut]
-        public async Task<IActionResult> Update(string jsonString)
-        {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            UserDTO userDTOQ = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTOQ.Email);
-            if (userQ != null) 
-            {
-                UserDTO user = new UserDTO()
-                {
-                    Email = userQ.Email,
-                    NickName = userDTOQ.NickName,
-                    Comments = userDTOQ.Comments
-                };
-                await _userService.Update(user);
-                return Ok("User updated seccesfully");
-
-            }
-            return BadRequest("User not found");
-        }
-
-        [Route("/api/Delete")]
-        [HttpDelete]
-        public async Task<IActionResult> Delete(string jsonString)
-        {
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            UserDTO userDTOQ = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTOQ.Email);
-            if (userQ != null)
-            {
-                UserDTO user = new UserDTO()
-                {
-                    Id = userQ.Id,
-                    Email = userQ.Email,
-                    NickName = userQ.NickName,
-                    Comments = userQ.Comments,
-                    CreateDate = userQ.CreateDate,
-                };
-                await _userService.Delete(user);
-                return Ok("user deleted seccesfully");
-            }
-            return BadRequest("User not found");
+            return Ok("что то пошло не так");
+            
         }
     }
 }
