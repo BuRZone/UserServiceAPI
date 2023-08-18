@@ -29,11 +29,10 @@ namespace UserServiceAPI.BLL.Services.Implementations
                     
                 if (userQ == null)
                 {
-                    var userIdQ = _repository.Get().Select(x => x.Id).Max();
+                    //var userIdQ = _repository.Get().Select(x => x.Id).Max();
 
                     var user = new User()
                     {
-                        Id = ++userIdQ,
                         Email = userDTO.Email,
                         NickName = userDTO.NickName,
                         Comments = userDTO.Comments,

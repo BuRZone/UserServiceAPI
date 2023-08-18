@@ -18,9 +18,8 @@ namespace UserServiceAPI.DAL.Migrations
 
             modelBuilder.Entity("UserServiceAPI.DAL.Entity.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Email")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Comments")
                         .HasColumnType("TEXT");
@@ -28,31 +27,26 @@ namespace UserServiceAPI.DAL.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("NickName")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("Email");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Comments = "new test user",
-                            CreateDate = new DateTime(2023, 8, 17, 14, 54, 45, 189, DateTimeKind.Local).AddTicks(3745),
                             Email = "Test@mail.com",
+                            Comments = "new test user",
+                            CreateDate = new DateTime(2023, 8, 18, 14, 20, 12, 599, DateTimeKind.Local).AddTicks(7006),
                             NickName = "BurBon"
                         },
                         new
                         {
-                            Id = 2,
-                            Comments = "second test user",
-                            CreateDate = new DateTime(2023, 8, 17, 14, 54, 45, 189, DateTimeKind.Local).AddTicks(8905),
                             Email = "Test1@mail.com",
+                            Comments = "second test user",
+                            CreateDate = new DateTime(2023, 8, 18, 14, 20, 12, 600, DateTimeKind.Local).AddTicks(2234),
                             NickName = "Turbo"
                         });
                 });

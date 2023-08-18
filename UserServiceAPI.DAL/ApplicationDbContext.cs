@@ -17,13 +17,10 @@ namespace UserServiceAPI.DAL
         {
             modelBuilder.Entity<User>(builder =>
             {
-                builder.ToTable(nameof(User));
-                builder.HasKey("Id");
                 builder.HasData(new User[]
                     {
                     new User()
                     {
-                        Id = 1,
                         Email = "Test@mail.com",
                         NickName = "BurBon",
                         CreateDate = DateTime.Now,
@@ -31,7 +28,6 @@ namespace UserServiceAPI.DAL
                     },
                     new User()
                     {
-                        Id = 2,
                         Email = "Test1@mail.com",
                         NickName = "Turbo",
                         CreateDate = DateTime.Now,

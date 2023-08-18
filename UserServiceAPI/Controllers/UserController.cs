@@ -8,6 +8,7 @@ using UserServiceAPI.BLL.Services.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UserServiceAPI.Controllers
 {
@@ -34,7 +35,6 @@ namespace UserServiceAPI.Controllers
                 {
                     UserDTO userDTO = new UserDTO()
                     {
-                        Id = user.Id,
                         Email = user.Email,
                         NickName = user.NickName,
                         Comments = user.Comments,
@@ -62,7 +62,6 @@ namespace UserServiceAPI.Controllers
             {
                 var UserDTO = new UserDTO()
                 {
-                    Id = userQ.Id,
                     Email = userQ.Email,
                     NickName = userQ.NickName,
                     Comments = userQ.Comments,
