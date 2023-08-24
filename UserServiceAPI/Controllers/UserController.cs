@@ -1,25 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
-using System;
 using UserServiceAPI.BLL.DTO;
 using UserServiceAPI.BLL.Services.Interfaces;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authorization;
 
 namespace UserServiceAPI.Controllers
 {
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly ILogger<UserDTO> _logger;
-        public UserController(IUserService userService, ILogger<UserDTO> logger)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _logger = logger;
         }
 
 
@@ -29,6 +23,8 @@ namespace UserServiceAPI.Controllers
         {
             List<UserDTO> userDTOList = new List<UserDTO>();
             var userQ = await _userService.Get().ToListAsync();
+
+            
             if (userQ.Count != 0)
             {
                 foreach (var user in userQ)
@@ -95,8 +91,7 @@ namespace UserServiceAPI.Controllers
             {
                 return Ok("User seccesfully created");
             }
-            return BadRequest("что то пошло не так");
-            
+            return BadRequest("что то пошло не так"); 
         }
 
         [Route("api/Update")]
@@ -116,7 +111,6 @@ namespace UserServiceAPI.Controllers
                 return Ok("User updated seccesfully");
             }
             return BadRequest();
-
         }
 
         [Route("api/Delete")]
@@ -136,7 +130,6 @@ namespace UserServiceAPI.Controllers
                 return Ok("User deleted seccesfully");
             }
             return BadRequest();
-
         }
     }
 }

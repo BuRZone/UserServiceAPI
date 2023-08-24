@@ -6,7 +6,6 @@ using UserServiceAPI.BLL.Services.Interfaces;
 using UserServiceAPI.DAL.Interfaces;
 using UserServiceAPI.DAL.Entity;
 using Microsoft.Extensions.Logging;
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace UserServiceAPI.BLL.Services.Implementations
