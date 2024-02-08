@@ -2,11 +2,11 @@
 using System.Linq;
 using UserServiceAPI.DAL.Entity;
 
-namespace UserServiceAPI.DAL
+namespace UserServiceAPI.DAL.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(ApplicationDbContext context) 
+        public static void Initialize(IApplicationDbContext context)
         {
             if (context.Users.Any())
             {
@@ -14,24 +14,23 @@ namespace UserServiceAPI.DAL
             }
             var user1 = new User()
             {
+                
                 Email = "Test@mail.com",
                 NickName = "BurBon",
-                CreateDate = DateTime.Now,
+                CreateDate = DateTime.Now.ToString(),
                 Comments = "new test user"
             };
             var user2 = new User()
             {
+                
                 Email = "Test1@mail.com",
                 NickName = "Turbo",
-                CreateDate = DateTime.Now,
+                CreateDate = DateTime.Now.ToString(),
                 Comments = "second test user"
             };
-            var users = new User[]{ user1, user2 };
 
-            context.AddRangeAsync(users);
+            context.Users.AddRange(new User[] { user1, user2 });
             context.SaveChangesAsync();
-
-
         }
     }
 }

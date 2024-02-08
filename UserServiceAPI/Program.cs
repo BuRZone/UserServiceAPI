@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using UserServiceAPI.DAL;
+using UserServiceAPI.DAL.Data;
 
 namespace UserServiceAPI
 {
@@ -12,8 +12,8 @@ namespace UserServiceAPI
             var host = CreateHostBuilder(args).Build();
             using (var scope = host.Services.CreateScope())
             {
-                var services = scope.ServiceProvider.GetService<ApplicationDbContext>();
-                DbInitializer.Initialize(services);
+                var context = scope.ServiceProvider.GetService<IApplicationDbContext>();
+                DbInitializer.Initialize(context);
             }
             host.Run();
         }

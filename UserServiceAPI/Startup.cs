@@ -1,40 +1,38 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using UserServiceAPI.DAL;
-using UserServiceAPI.DAL.Entity;
-using UserServiceAPI.DAL.Repositories;
-using UserServiceAPI.DAL.Interfaces;
-using UserServiceAPI.BLL.Services.Implementations;
-using UserServiceAPI.BLL.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
+using UserServiceAPI.DAL;
+using UserServiceAPI.BLL;
 
 namespace UserServiceAPI
 {
     public class Startup
     {
+        private IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
- 
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
             services.AddSwaggerGen();
-            var conectionString = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<ApplicationDbContext>(o => o.UseSqlite(conectionString));
-            services.AddScoped<IBaseRepository<User>, UserRepository>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddDbApplication(Configuration);
+            services.AddLogicApplication();
+            services.AddCors(o =>
+            {
+                o.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyMethod();
+                    policy.AllowAnyOrigin();
+                });
+            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -42,14 +40,15 @@ namespace UserServiceAPI
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            
+            app.UseRouting();
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 

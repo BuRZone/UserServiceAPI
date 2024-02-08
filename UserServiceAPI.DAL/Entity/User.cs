@@ -1,14 +1,13 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace UserServiceAPI.DAL.Entity
 {
     public class User
     {
-        [Key]
-        public string Email { get; set; }
-        public string NickName { get; set; }
-        public string Comments { get; set; }
-        public DateTime CreateDate { get; set; }
+        public Guid Id { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string NickName { get; set; } = string.Empty;
+        public string Comments { get; set; } = string.Empty;
+        public string CreateDate { get; set; } = string.Empty;
     }
 }

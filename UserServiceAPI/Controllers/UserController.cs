@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using UserServiceAPI.BLL.DTO;
-using UserServiceAPI.BLL.Services.Interfaces;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
+using UserServiceAPI.BLL.Models;
+using UserServiceAPI.BLL.Interfaces;
+using System.Linq;
+using System.Threading;
+using System;
 
 namespace UserServiceAPI.Controllers
 {
@@ -16,120 +16,87 @@ namespace UserServiceAPI.Controllers
             _userService = userService;
         }
 
-
-        [Route("api/List")]
+        [Route("api/v1/List")]
         [HttpGet]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
         {
-            List<UserDTO> userDTOList = new List<UserDTO>();
-            var userQ = await _userService.Get().ToListAsync();
+            var userQ = await _userService.GetAllUsersAsync(cancellationToken);
 
-            
-            if (userQ.Count != 0)
+            if (userQ.Count() == 0)
             {
-                foreach (var user in userQ)
-                {
-                    UserDTO userDTO = new UserDTO()
-                    {
-                        Email = user.Email,
-                        NickName = user.NickName,
-                        Comments = user.Comments,
-                        CreateDate = user.CreateDate
-                    };
-                    userDTOList.Add(userDTO);
-                }
-                return Ok(userDTOList);
+                return NotFound("no User found");
             }
-            return BadRequest("no User found");
+            if(userQ == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok(userQ);
         }
 
-        [Route("api/Get")]
+        [Route("api/v1/Get/{email}")]
         [HttpGet]
-        public async Task<IActionResult> Get(string jsonString)
+        public async Task<IActionResult> GetUserByEmailAsync([FromRoute] string email, CancellationToken cancellationToken)
         {
-            var options = new JsonSerializerOptions
+            var userQ = (await _userService.GetAllUsersAsync(cancellationToken))
+                .SingleOrDefault(x => x.Email == email);
+            if (userQ == null)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
-            if (userQ != null)
-            {
-                var UserDTO = new UserDTO()
-                {
-                    Email = userQ.Email,
-                    NickName = userQ.NickName,
-                    Comments = userQ.Comments,
-                    CreateDate = userQ.CreateDate
-                };
-                return Ok(UserDTO);
+                return NotFound("User not found");
             }
-            return BadRequest("User not found");
+            return Ok(userQ);
 
         }
-        [Route("api/Create")]
+
+        [Route("api/v1/Create")]
         [HttpPost]
-        public async Task<IActionResult> Create(string jsonString)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateUserDto createUserDto, CancellationToken cancellationToken)
         {
-            var options = new JsonSerializerOptions
+            if (ModelState.IsValid == false)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
-            if (userQ != null)
-            {
-                return BadRequest("User allready exist");
+                return ValidationProblem(ModelState);
             }
-
-            await _userService.Create(userDTO);
-
-            var userQuery  = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
-            if (userQuery != null)
+            var result = await _userService.CreateUserAsync(createUserDto, cancellationToken);
+            if(result == false)
             {
-                return Ok("User seccesfully created");
+                return BadRequest($"User with email {createUserDto.Email} allready exist");
             }
-            return BadRequest("что то пошло не так"); 
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok("User created seccesfully");
         }
 
-        [Route("api/Update")]
+        [Route("api/v1/Update")]
         [HttpPut]
-        public async Task<IActionResult> Update(string jsonString)
+        public async Task<IActionResult> UpdateAsync([FromBody] UpdateUserDto updateUserDto, CancellationToken cancellationToken)
         {
-            var options = new JsonSerializerOptions
+            if (ModelState.IsValid == false)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
-            if (userQ != null) 
-            {
-                await _userService.Update(userDTO);
-                return Ok("User updated seccesfully");
+                return ValidationProblem(ModelState);
             }
-            return BadRequest();
+            var result = await _userService.UpdateUserAsync(updateUserDto, cancellationToken);
+            if (result == false)
+            {
+                return StatusCode(500);
+            }
+            return Ok("User updated seccesfully");
         }
 
-        [Route("api/Delete")]
+        [Route("api/v1/Delete/{id:guid}")]
         [HttpDelete]
-        public async Task<IActionResult> Delete(string jsonString)
+        public async Task<IActionResult> DeleteAsync([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            var options = new JsonSerializerOptions
+            var result = await _userService.DeleteUserAsync(id, cancellationToken);
+            if (result == false)
             {
-                PropertyNameCaseInsensitive = true
-            };
-
-            UserDTO userDTO = JsonSerializer.Deserialize<UserDTO>(jsonString, options);
-            var userQ = await _userService.Get().FirstOrDefaultAsync(x => x.Email == userDTO.Email);
-            if (userQ != null)
-            {
-                await _userService.Delete(userDTO);
-                return Ok("User deleted seccesfully");
+                return NotFound($"The User with id {id} not found");
             }
-            return BadRequest();
+            if(result == null)
+            {
+                return StatusCode(500);
+            }
+            return Ok("User deleted seccesfully");
         }
     }
 }
